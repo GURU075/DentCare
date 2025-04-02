@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+
+
+
 import {
   AppBar,
   Toolbar,
@@ -112,6 +115,14 @@ const PatientDetailDrawer = ({ open, onClose, patient }) => {
                   value={formData.dob}
                   onChange={handleFieldChange('dob')}
                 />
+                {/* <DatePicker
+                  label="Date of Birthh"
+                  value={formData.dob ? dayjs(formData.dob) : null} // Convert `dob` to a Day.js object
+                  onChange={(newValue) =>
+                    setFormData({ ...formData, dob: newValue ? newValue.format('YYYY-MM-DD') : '' })
+                  } // Format the selected date
+                  renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
+                /> */}
                 <TextField
                   label="Address"
                   fullWidth
@@ -224,6 +235,14 @@ const NewPatientDrawer = ({
         fullWidth
         margin="normal"
       />
+      {/* <DatePicker
+  label="Date of Birth"
+  value={formData.dob ? dayjs(formData.dob) : null} // Convert `dob` to a Day.js object
+  onChange={(newValue) =>
+    setFormData({ ...formData, dob: newValue ? newValue.format('YYYY-MM-DD') : '' })
+  } // Format the selected date
+  renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
+/> */}
       <TextField
         label="Address"
         value={address}
@@ -350,8 +369,7 @@ const DentistNavbar = () => {
       <AppBar position="static" sx={{ backgroundColor: '#2196f3' }}>
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            DentCare
-          </Typography>
+            Kankariya Dental          </Typography>
           <Box sx={{ position: 'relative', mr: 2 }}>
             <TextField
               size="small"

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useEffect } from 'react';
 
 const BASE_URL = 'https://dentist-app-production.up.railway.app';
 
@@ -102,12 +103,24 @@ export const getAppointmentById = async (appointmentId) => {
   }
 };
 
+export const deleteAppointmentById = async (appointmentId) => {
+  try {
+    const response = await axios.delete(`${BASE_URL}/appointments/${appointmentId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error in deleteAppointmentById:', error);
+    throw error;
+  }
+};
+
+
 export const editAppointment = async (appointmentId, updateData) => {
   try {
     const response = await axios.patch(
       `${BASE_URL}/appointments/${appointmentId}`,
       updateData
     );
+    // console.log('Edit appointment response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error in editAppointment:', error);

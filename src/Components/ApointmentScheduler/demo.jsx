@@ -22,11 +22,14 @@ import {
   getAppointments,     // fetch appts for a given date
   createAppointment,    // create a new appt
   editAppointment,      // update an existing appt
-  getAppointmentById,   // fetch a single appt's full details
+  getAppointmentById,
+  deleteAppointmentById   
 } from '../../api';
 
 // Import your custom BasicLayout for the AppointmentForm
 import { BasicLayout } from './BasicLayout';
+
+// import { CustomTooltipContent} from './CustomTooltipContent';
 
 // -- A small helper to get today's date in YYYY-MM-DD
 const getTodayDateString = () => {
@@ -37,6 +40,31 @@ const getTodayDateString = () => {
   return `${year}-${month}-${day}`;
 };
 
+// const CustomAppointment = memo(({ children, style, ...restProps }) => {
+//   const { data } = restProps;
+//   const patientName = data?.patientId?.name || data?.patient_id?.name || '(No patient)';
+//   const branchName = data?.branchId?.name || data?.branch_id?.name || '(No branch)';
+
+//   return (
+//     <div
+//       style={{
+//         ...style,
+//         backgroundColor: '#4caf50',
+//         color: '#fff',
+//         borderRadius: '8px',
+//         padding: '8px',
+//         height: '100%',
+//         overflow: 'hidden'
+//       }}
+//       {...restProps}
+//     >
+//       <strong>{data?.title || 'Appointment'}</strong>
+//       <p style={{ margin: 0, fontSize: '12px' }}>Patient: {patientName}</p>
+//       <p style={{ margin: 0, fontSize: '12px' }}>Branch: {branchName}</p>
+//       {children}
+//     </div>
+//   );
+// });
 // -------------------- (A) Custom Tooltip Content --------------------
 const CustomTooltipContent = ({ appointmentData, ...restProps }) => {
   const [fullDetail, setFullDetail] = useState(null);
@@ -53,6 +81,16 @@ const CustomTooltipContent = ({ appointmentData, ...restProps }) => {
     };
     fetchDetail();
   }, [appointmentData?.id]);
+
+   const handleStatusUpdate = async () => {
+      try {
+        const updatedStatus = fullDetail.status === 'COMPLETED' ? 'UPCOMING' : 'COMPLETED';
+        await editAppointment(appointmentData.id, { status: updatedStatus });
+        setStatus(updatedStatus);
+      } catch (error) {
+        console.error('Error updating appointment status:', error);
+      }
+    };
 
   // While we don't have the full detail yet, just show a loading state
   if (!fullDetail) {
@@ -80,7 +118,32 @@ const CustomTooltipContent = ({ appointmentData, ...restProps }) => {
       <p>
         <strong>Branch:</strong> {branchName}
       </p>
-      {/* You can show more fields as needed */}
+      <p >
+      <strong>Status:</strong> {fullDetail.status}
+      </p>
+      <div
+      style={{
+        display: 'flex',
+        justifyContent: 'flex-end', // Align the button to the row end
+        marginTop: '10px',
+      }}
+    >
+      <button
+        onClick={handleStatusUpdate}
+        style={{
+          marginTop: '10px',
+          padding: '8px 12px',
+          backgroundColor: fullDetail.status === 'COMPLETED' ? '#f44336' : '#4caf50',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+        }}
+        
+      >
+        Mark as {fullDetail.status === 'COMPLETED' ? 'Upcoming' : 'Completed'}
+      </button>
+      </div>
     </div>
   );
 };
@@ -93,6 +156,26 @@ const Demo = () => {
   // For new appointments in DevExpress
   const [addedAppointment, setAddedAppointment] = useState({});
   const [isAppointmentBeingCreated, setIsAppointmentBeingCreated] = useState(false);
+
+  const fetchData1 = async () => {
+    try {
+      const response = await getAppointments(currentDate);
+      const appointmentsFromServer = response.data;
+  
+      const mappedData = appointmentsFromServer.map((appt) => ({
+        id: appt._id,
+        title: appt.notes || 'Appointment',
+        startDate: appt.start_time,
+        endDate: appt.end_time,
+
+        patientId: appt.patient_id,
+        branchId: appt.branch_id,
+      }));
+      setData(mappedData);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    }
+  };
 
   // -------------------- 1) Load appointments for currentDate --------------------
   useEffect(() => {
@@ -169,8 +252,25 @@ const Demo = () => {
           };
 
           const updated = await editAppointment(changedId, updateData);
+          console.log('Updated appointment:', updated);
+          const response =  await getAppointments(currentDate);
+          const appointmentsFromServer = response.data;
 
-          // Reflect changes in local state
+        const mappedData = appointmentsFromServer.map((appt) => ({
+          id: appt._id,
+          title: appt.notes || 'Appointment',
+          startDate: appt.start_time,
+          endDate: appt.end_time,
+          patientId: appt.patient_id,
+          branchId: appt.branch_id,
+        }));
+        setData(mappedData);
+
+          useEffect(()=>
+            setIsAppointmentBeingCreated(false),[]
+          );
+
+            // Reflect changes in local state
           setData((prevData) =>
             prevData.map((appointment) =>
               appointment.id.toString() === changedId.toString()
@@ -185,6 +285,9 @@ const Demo = () => {
                 : appointment
             )
           );
+          
+          // await fetchData1();
+          // window.location.reload();
         } catch (error) {
           console.error('Error editing appointment:', error);
         }
@@ -192,11 +295,17 @@ const Demo = () => {
 
       // ----- (C) DELETE
       if (deleted !== undefined) {
-        // If you have a delete endpoint, call it here:
-        // await deleteAppointment(deleted)
-        setData((prevData) =>
-          prevData.filter((appointment) => appointment.id !== deleted)
-        );
+        try {
+          // Call the delete API
+          await deleteAppointmentById(deleted);
+  
+          // Update local state
+          setData((prevData) =>
+            prevData.filter((appointment) => appointment.id !== deleted)
+          );
+        } catch (error) {
+          console.error('Error deleting appointment:', error);
+        }
       }
 
       setIsAppointmentBeingCreated(false);
@@ -257,6 +366,7 @@ const Demo = () => {
         <Toolbar />
         <DateNavigator />
         <TodayButton />
+        {/* <Appointments appointmentComponent={CustomAppointment} /> */}
         <Appointments />
 
         {/* 
