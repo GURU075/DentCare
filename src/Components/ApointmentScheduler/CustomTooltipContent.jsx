@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { editAppointment } from '../../api'; // Ensure this API is implemented
+import { editAppointment } from '../../api'; // Ensure sthis API is implemented
 
 const CustomTooltipContent = ({ appointmentData, ...restProps }) => {
   const [status, setStatus] = useState(appointmentData.status || 'UPCOMING');
