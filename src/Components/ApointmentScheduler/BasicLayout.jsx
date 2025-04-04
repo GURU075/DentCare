@@ -20,6 +20,11 @@ export const BasicLayout = ({
   appointmentData,
   ...restProps
 }) => {
+
+  const defaultTitles = ["RCT", "Filling", "Cleaning", "Cap Measurement", "Cap Fixing", "Ortho"];
+  const handleTitleChange = (e) => {
+    onFieldChange({ title: e.target.value });
+  };
   // -------------------- Patient live search --------------------
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -98,69 +103,7 @@ export const BasicLayout = ({
   // -------------------- Render a fully custom layout --------------------
   return (
     <div style={{ padding: 16 }}>
-      {/* Start Date/Time */}
-      <Box display="flex" gap={2}>
-        <Box>
-          <AppointmentForm.Label text="Start Date" type="dateTime" />
-          <AppointmentForm.DateEditor
-            value={appointmentData.startDate}
-            onValueChange={(val) => onFieldChange({ startDate: val })}
-          />
-        </Box>
-        <Box>
-          <AppointmentForm.Label text="End Date" type="dateTime" />
-          <AppointmentForm.DateEditor
-            value={appointmentData.endDate}
-            onValueChange={(val) => onFieldChange({ endDate: val })}
-          />
-        </Box>
-      </Box>
-
-      {/* All Day */}
-      {/* <Box mt={2}>
-        <AppointmentForm.Label text="All Day" type="allDay" />
-        <AppointmentForm.BooleanEditor
-          value={appointmentData.allDay || false}
-          onValueChange={(val) => onFieldChange({ allDay: val })}
-        />
-      </Box>
-
-      <Box mt={2}>
-        <AppointmentForm.Label text="Repeat" type="repeat" />
-        <AppointmentForm.BooleanEditor
-          value={!!appointmentData.rRule}
-          onValueChange={(val) => {
-            // Here you'd manage recurrence rules if needed
-            // e.g. onFieldChange({ rRule: val ? "FREQ=DAILY" : undefined })
-          }}
-        />
-      </Box> */}
-       {/* Details (title) */}
-       <Box mt={2}>
-        <AppointmentForm.Label text="Title" type="title" />
-        <AppointmentForm.TextEditor
-          type="title"
-          placeholder="Enter title here..."
-          value={appointmentData.title || ''}
-          onValueChange={(val) => onFieldChange({ title: val })}
-        />
-      </Box>
-
-      {/* More Information (notes) */}
-      <Box mt={2}>
-        <AppointmentForm.Label text="More Information" type="notes" />
-        <AppointmentForm.TextEditor
-          type="multilineTextEditor"
-          placeholder="Enter additional notes..."
-          value={appointmentData.notes || ''}
-          onValueChange={(val) => onFieldChange({ notes: val })}
-        />
-      </Box>
-
-     
-
-      {/* Patient search */}
-      <Box sx={{ position: 'relative', mt: 2 }}>
+        <Box sx={{ position: 'relative', mt: 2 , mb: 2}}>
         <TextField
           label="Search Patient..."
           variant="outlined"
@@ -193,6 +136,76 @@ export const BasicLayout = ({
             ))}
           </List>
         )}
+         {appointmentData.patientId && (
+        <Typography sx={{ mt: 1 }}>
+          <strong>Selected Patient ID:</strong> {appointmentData.patientId}
+        </Typography>
+      )}
+        </Box>
+ 
+      {/* Start Date/Time */}
+
+      <FormControl fullWidth margin="normal" sx={{ position: 'relative', mt: 2 , mb: 4}}>
+        <InputLabel id="title-label">Select Title</InputLabel>
+        <Select
+          labelId="title-label"
+          value={appointmentData.title || ""}
+          onChange={handleTitleChange}
+        >
+          {defaultTitles.map((titleOption) => (
+            <MenuItem key={titleOption} value={titleOption}>
+              {titleOption}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <Box display="flex" gap={2}>
+        <Box>
+          <AppointmentForm.Label text="Start Date" type="dateTime" />
+          <AppointmentForm.DateEditor
+            value={appointmentData.startDate}
+            onValueChange={(val) => onFieldChange({ startDate: val })}
+          />
+        </Box>
+        <Box>
+          <AppointmentForm.Label text="End Date" type="dateTime" />
+          <AppointmentForm.DateEditor
+            value={appointmentData.endDate}
+            onValueChange={(val) => onFieldChange({ endDate: val })}
+          />
+        </Box>
+      </Box>
+
+     
+       {/* Details (title) */}
+       {/* <Box mt={2}>
+        <AppointmentForm.Label text="Title" type="title" />
+        <AppointmentForm.TextEditor
+          type="title"
+          placeholder="Enter title here....."
+          value={appointmentData.title || ''}
+          onValueChange={(val) => onFieldChange({ title: val })}
+        />
+      </Box> */}
+      
+
+      {/* More Information (notes) */}
+      {/* <Box mt={2}>
+        <AppointmentForm.Label text="More Information" type="notes" />
+        <AppointmentForm.TextEditor
+          type="multilineTextEditor"
+          placeholder="Enter additional notes..."
+          value={appointmentData.notes || ''}
+          onValueChange={(val) => onFieldChange({ notes: val })}
+        />
+      </Box> */}
+
+     
+
+      {/* Patient search */}
+      <Box sx={{ position: 'relative', mt: 2 }}>
+        
       </Box>
       {/* <Button
         variant="contained"
@@ -201,11 +214,7 @@ export const BasicLayout = ({
       >
         Search Patient
       </Button> */}
-      {appointmentData.patientId && (
-        <Typography sx={{ mt: 1 }}>
-          <strong>Selected Patient ID:</strong> {appointmentData.patientId}
-        </Typography>
-      )}
+     
 
       {/* Branch dropdown */}
       <FormControl fullWidth margin="normal">
